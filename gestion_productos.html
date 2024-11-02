@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Productos - Sakura Petshop</title>
+  <style>
+    /* Estilos de la página */
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      width: 100%;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      width: 100%;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    h2 {
+      color: #af4c95;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .product-list {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+    }
+
+    .product-item {
+      background-color: white;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .product-item h3 {
+      color: #333;
+      margin: 0 0 10px;
+      font-size: 1em;
+    }
+
+    .product-item img {
+      max-width: 100px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .product-info,
+    .product-edit {
+      display: none;
+    }
+
+    .product-view .product-info {
+      display: block;
+    }
+
+    .product-edit-mode .product-edit {
+      display: block;
+      text-align: left;
+    }
+
+    .product-edit label {
+      display: block;
+      font-weight: bold;
+      color: #333;
+      margin-top: 8px;
+    }
+
+    .product-edit input[type="text"],
+    .product-edit input[type="number"],
+    .product-edit select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .button-container button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+      font-size: 0.9em;
+    }
+
+    .edit-button {
+      background-color: #4caf50;
+    }
+
+    .delete-button {
+      background-color: #f44336;
+    }
+
+    .save-button {
+      background-color: #af4c95;
+    }
+
+    .cancel-button {
+      background-color: #555;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sakura Petshop</h1>
+  <p>Gestión de Productos</p>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="carrito.html">Carrito</a>
+  <a href="perfil_admin.html">Perfil Admin</a>
+</nav>
+
+<h2>Gestiona tus productos</h2>
+<div class="product-list" id="productList">
+  <!-- Aquí se mostrarán los productos para editar -->
+</div>
+
+<footer>
+  <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+</footer>
+
+<script>
+  function loadProducts() {
+    return JSON.parse(localStorage.getItem('products')) || [];
+  }
+
+  function saveProducts(products) {
+    localStorage.setItem('products', JSON.stringify(products));
+  }
+
+  function displayProducts() {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = '';
+
+    const products = loadProducts();
+    products.forEach((product, index) => {
+      const productItem = document.createElement('div');
+      productItem.classList.add('product-item', 'product-view');
+      productItem.id = `product-${index}`;
+      productItem.innerHTML = `
+        <h3>${product.name}</h3>
+        <img src="${product.image || 'default.jpg'}" alt="Imagen del producto" id="imageDisplay-${index}">
+        
+        <div class="product-info">
+          <p><strong>Descripción:</strong> ${product.description}</p>
+          <p><strong>Precio:</strong> $${product.price}</p>
+          <p><strong>Oferta:</strong> ${product.offerPrice ? `$${product.offerPrice}` : 'No aplica'}</p>
+          <p><strong>Stock:</strong> ${product.stock}</p>
+          <p><strong>Categoría:</strong> ${product.category}</p>
+          <p><strong>Subcategoría:</strong> ${product.subcategory}</p>
+          <p><strong>Mostrar en:</strong> ${product.showIn}</p>
+        </div>
+        
+        <div class="product-edit">
+          <label>Descripción:</label>
+          <input type="text" value="${product.description}" id="description-${index}">
+          
+          <label>Precio:</label>
+          <input type="number" value="${product.price}" id="price-${index}">
+          
+          <label>Precio de Oferta (Opcional):</label>
+          <input type="number" value="${product.offerPrice || ''}" id="offerPrice-${index}">
+          
+          <label>Stock:</label>
+          <input type="number" value="${product.stock}" id="stock-${index}">
+
+          <label>Cambiar Imagen:</label>
+          <input type="file" id="image-${index}" onchange="previewImage(${index})">
+
+          <label>Categoría:</label>
+          <select id="category-${index}">
+            <option value="perros" ${product.category === 'perros' ? 'selected' : ''}>Perros</option>
+            <option value="gatos" ${product.category === 'gatos' ? 'selected' : ''}>Gatos</option>
+            <option value="otros" ${product.category === 'otros' ? 'selected' : ''}>Otros</option>
+          </select>
+
+          <label>Subcategoría:</label>
+          <select id="subcategory-${index}">
+            <option value="alimentos" ${product.subcategory === 'alimentos' ? 'selected' : ''}>Alimentos</option>
+            <option value="medicamentos" ${product.subcategory === 'medicamentos' ? 'selected' : ''}>Medicamentos</option>
+            <option value="juguetes" ${product.subcategory === 'juguetes' ? 'selected' : ''}>Juguetes</option>
+            <option value="arenas" ${product.subcategory === 'arenas' ? 'selected' : ''}>Arenas</option>
+            <option value="rascadores" ${product.subcategory === 'rascadores' ? 'selected' : ''}>Rascadores</option>
+            <option value="snacks" ${product.subcategory === 'snacks' ? 'selected' : ''}>Snacks</option>
+            <option value="camas" ${product.subcategory === 'camas' ? 'selected' : ''}>Camas</option>
+            <option value="acuario" ${product.subcategory === 'acuario' ? 'selected' : ''}>Acuario</option>
+            <option value="casa" ${product.subcategory === 'casa' ? 'selected' : ''}>Casa</option>
+            <option value="collares" ${product.subcategory === 'collares' ? 'selected' : ''}>Collares</option>
+          </select>
+
+          <label>Mostrar en:</label>
+          <select id="showIn-${index}">
+            <option value="index" ${product.showIn === 'index' ? 'selected' : ''}>Index</option>
+            <option value="productos" ${product.showIn === 'productos' ? 'selected' : ''}>Productos</option>
+            <option value="both" ${product.showIn === 'both' ? 'selected' : ''}>Ambas</option>
+          </select>
+        </div>
+
+        <div class="button-container">
+          <button class="edit-button" onclick="toggleEdit(${index})">Editar</button>
+          <button class="delete-button" onclick="deleteProduct(${index})">Eliminar</button>
+          <button class="save-button" onclick="saveChanges(${index})" style="display:none;">Guardar Cambios</button>
+          <button class="cancel-button" onclick="toggleEdit(${index})" style="display:none;">Cancelar</button>
+        </div>
+      `;
+      productList.appendChild(productItem);
+    });
+  }
+
+  function toggleEdit(index) {
+    const productItem = document.getElementById(`product-${index}`);
+    productItem.classList.toggle('product-edit-mode');
+    productItem.querySelector('.product-info').style.display = productItem.classList.contains('product-edit-mode') ? 'none' : 'block';
+    productItem.querySelector('.product-edit').style.display = productItem.classList.contains('product-edit-mode') ? 'block' : 'none';
+    productItem.querySelector('.edit-button').style.display = productItem.classList.contains('product-edit-mode') ? 'none' : 'block';
+    productItem.querySelector('.save-button').style.display = productItem.classList.contains('product-edit-mode') ? 'block' : 'none';
+    productItem.querySelector('.cancel-button').style.display = productItem.classList.contains('product-edit-mode') ? 'block' : 'none';
+  }
+
+  function previewImage(index) {
+    const file = document.getElementById(`image-${index}`).files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById(`imageDisplay-${index}`).src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function saveChanges(index) {
+    const products = loadProducts();
+    const productItem = document.getElementById(`product-${index}`);
+
+    const updatedProduct = {
+      ...products[index],
+      description: document.getElementById(`description-${index}`).value,
+      price: parseFloat(document.getElementById(`price-${index}`).value),
+      offerPrice: parseFloat(document.getElementById(`offerPrice-${index}`).value) || null,
+      stock: parseInt(document.getElementById(`stock-${index}`).value),
+      category: document.getElementById(`category-${index}`).value,
+      subcategory: document.getElementById(`subcategory-${index}`).value,
+      showIn: document.getElementById(`showIn-${index}`).value,
+      image: document.getElementById(`imageDisplay-${index}`).src
+    };
+
+    products[index] = updatedProduct;
+    saveProducts(products);
+    toggleEdit(index);
+    displayProducts();
+  }
+
+  function deleteProduct(index) {
+    const products = loadProducts();
+    products.splice(index, 1);
+    saveProducts(products);
+    displayProducts();
+    alert("Producto eliminado exitosamente.");
+  }
+
+  displayProducts();
+</script>
+
+</body>
+</html>

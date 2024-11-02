@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos - Sakura Petshop</title>
+  <style>
+    body { font-family: Trebuchet MS, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; display: flex; flex-direction: column; min-height: 100vh; }
+    header { background-color: #af4c95; color: white; padding: 15px 20px; text-align: center; }
+    nav { background-color: #333; overflow: hidden; }
+    nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; }
+    nav a:hover { background-color: #ddd; color: black; }
+    .main-content { padding: 20px; text-align: center; flex: 1; }
+    .filters { display: flex; justify-content: space-around; margin: 20px; }
+    .filters select, .filters button { padding: 10px; font-size: 1em; border: 1px solid #af4c95; border-radius: 5px; background-color: #fff; cursor: pointer; }
+    .filters button { background-color: #af4c95; color: white; border: none; }
+    .filters button:hover { background-color: #7b346f; }
+    .product-list { display: flex; flex-wrap: wrap; justify-content: space-around; margin: 40px 0; }
+    .product { background-color: white; border: 1px solid #ddd; border-radius: 5px; padding: 20px; width: 30%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); text-align: center; margin: 10px; position: relative; }
+    .product img { max-width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+    .product h3 { margin-top: 15px; color: #333; }
+    .product p { color: #777; }
+    .price, .offer-price { font-size: 1.5em; color: #af4c95; margin-top: 10px; }
+    .offer-price { color: #d9534f; font-weight: bold; }
+    .original-price { font-size: 1.2em; text-decoration: line-through; color: #777; margin-right: 5px; }
+    .offer-badge { background-color: #d9534f; color: white; font-weight: bold; padding: 8px 12px; font-size: 2.2em; border-radius: 5px; position: absolute; top: 10px; right: 10px; }
+    .add-to-cart-btn { padding: 8px 15px; background-color: #af4c95; color: white; border: none; cursor: pointer; font-size: 0.9em; margin-top: 10px; border-radius: 5px; }
+    .add-to-cart-btn:hover { background-color: #7b346f; }
+    .pagination { display: flex; justify-content: center; align-items: center; margin: 20px 0; }
+    .pagination button { padding: 10px 15px; margin: 0 5px; border: none; background-color: #af4c95; color: white; cursor: pointer; border-radius: 5px; }
+    .pagination button:disabled { background-color: #ddd; cursor: not-allowed; }
+    .pagination button:hover:not(:disabled) { background-color: #7b346f; }
+    .pagination span { font-size: 1.1em; margin: 0 10px; }
+    .no-products-message { text-align: center; font-size: 1.2em; color: #af4c95; margin: 40px 0; padding: 20px; background-color: #f1f1f1; border-radius: 5px; }
+    footer { background-color: #333; color: white; text-align: center; padding: 10px 0; margin-top: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sakura Petshop</h1>
+    <p>Tu tienda de confianza para tus mascotas</p>
+  </header>
+  
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="productos.html">Productos</a>
+    <a href="carrito.html">Carrito</a>
+    <a href="login.html">Iniciar Sesión</a>
+  </nav>
+
+  <div class="main-content">
+    <h1>Catálogo de Productos</h1>
+    <p>Selecciona el filtro que desees para encontrar productos específicos.</p>
+  </div>
+
+  <div class="filters">
+    <select id="categoryFilter">
+      <option value="all">Todos</option>
+      <option value="perros">Perros</option>
+      <option value="gatos">Gatos</option>
+      <option value="otros">Otros</option>
+    </select>
+
+    <select id="subcategoryFilter">
+      <option value="all">Todos</option>
+      <option value="alimentos">Alimentos</option>
+      <option value="medicamentos">Medicamentos</option>
+      <option value="juguetes">Juguetes</option>
+      <option value="arenas">Arenas</option>
+      <option value="rascadores">Rascadores</option>
+      <option value="snacks">Snacks</option>
+      <option value="camas">Camas</option>
+      <option value="acuario">Acuario</option>
+      <option value="casa">Casa</option>
+      <option value="collares">Collares</option>
+    </select>
+
+    <select id="priceSort" onchange="sortProductsByPrice()">
+      <option value="default">Seleccionar</option>
+      <option value="low-to-high">De menor a mayor</option>
+      <option value="high-to-low">De mayor a menor</option>
+    </select>
+
+    <button id="applyFilters">Buscar</button>
+  </div>
+
+  <section class="product-list" id="productList"></section>
+
+  <div class="pagination" id="pagination">
+    <button id="prevPage" disabled>Anterior</button>
+    <span id="pageIndicator">Página 1</span>
+    <button id="nextPage">Siguiente</button>
+  </div>
+
+  <div id="noProductsMessage" class="no-products-message" style="display: none;">
+    ¡Guau! No encontramos nada con esos filtros, parece que nuestros amigos peludos se escondieron. 🐾 Prueba con otra combinación.
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    let currentPage = 1;
+    const productsPerPage = 9;
+    let filteredProducts = [];
+
+    function loadProducts() {
+      return JSON.parse(localStorage.getItem('products')) || [];
+    }
+
+    function applyFilters() {
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const subcategoryFilter = document.getElementById('subcategoryFilter').value;
+
+      filteredProducts = loadProducts().filter(product => {
+        const matchCategory = (categoryFilter === 'all' || product.category === categoryFilter);
+        const matchSubcategory = (subcategoryFilter === 'all' || product.subcategory === subcategoryFilter);
+        return matchCategory && matchSubcategory;
+      });
+
+      currentPage = 1;
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const productContainer = document.getElementById('productList');
+      const noProductsMessage = document.getElementById('noProductsMessage');
+      productContainer.innerHTML = '';
+
+      if (filteredProducts.length === 0) {
+        noProductsMessage.style.display = 'block';
+        productContainer.style.display = 'none';
+        document.getElementById('pagination').style.display = 'none';
+      } else {
+        noProductsMessage.style.display = 'none';
+        productContainer.style.display = 'flex';
+        document.getElementById('pagination').style.display = 'flex';
+
+        const startIndex = (currentPage - 1) * productsPerPage;
+        const endIndex = startIndex + productsPerPage;
+        const productsToDisplay = filteredProducts.slice(startIndex, endIndex);
+
+        productsToDisplay.forEach(product => {
+          const productElement = document.createElement('div');
+          productElement.classList.add('product');
+          productElement.innerHTML = `
+            <img src="${product.image || 'default.jpg'}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            ${product.offerPrice ? `<p class="original-price">$${product.price}</p><p class="offer-price">$${product.offerPrice}</p><div class="offer-badge">OFERTA</div>` : `<p class="price">$${product.price}</p>`}
+            <button class="add-to-cart-btn" onclick="addToCart('${product.name}', ${product.price}, ${product.offerPrice || null}, '${product.image || 'default.jpg'}')">Añadir al Carrito</button>
+          `;
+          productContainer.appendChild(productElement);
+        });
+
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = endIndex >= filteredProducts.length;
+        document.getElementById('pageIndicator').textContent = `Página ${currentPage}`;
+      }
+
+      window.scrollTo(0, 0);
+    }
+
+    function sortProductsByPrice() {
+      const sortOption = document.getElementById('priceSort').value;
+
+      if (sortOption === 'low-to-high') {
+        filteredProducts.sort((a, b) => a.price - b.price);
+      } else if (sortOption === 'high-to-low') {
+        filteredProducts.sort((a, b) => b.price - a.price);
+      }
+
+      renderProducts();
+    }
+
+    function addToCart(name, price, offerPrice, image) {
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      if (!isAuthenticated) {
+        alert('Debes iniciar sesión para añadir productos al carrito.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingProduct = cart.find(item => item.name === name);
+      if (existingProduct) {
+        existingProduct.quantity += 1;
+      } else {
+        cart.push({ name, price, offerPrice, image, quantity: 1 });
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert(`"${name}" ha sido añadido al carrito.`);
+    }
+
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderProducts();
+      }
+    });
+    document.getElementById('nextPage').addEventListener('click', () => {
+      if ((currentPage * productsPerPage) < filteredProducts.length) {
+        currentPage++;
+        renderProducts();
+      }
+    });
+
+    filteredProducts = loadProducts();
+    renderProducts();
+  </script>
+</body>
+</html>

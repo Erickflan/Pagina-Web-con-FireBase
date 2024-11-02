@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil de Usuario - Sakura Petshop</title>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    nav a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .profile-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .profile-card {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-card h2 {
+      margin-bottom: 10px;
+      color: #af4c95;
+    }
+
+    .profile-card p {
+      margin: 5px 0;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    .profile-card button {
+      width: 80%;
+      padding: 10px;
+      background-color: #af4c95;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .profile-card button:hover {
+      background-color: #7b346f;
+    }
+
+    .edit-form {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .edit-form button {
+      margin-top: 10px;
+      width: calc(50% - 5px);
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sakura Petshop</h1>
+    <p>Tu tienda de confianza para tus mascotas</p>
+    <p>Perfil de Usuario</p>
+    <span id="userWelcome" style="display:none; color:white; font-weight: bold;"></span>
+  </header>
+
+  <nav>
+    <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+    <a href="productos.html"><i class="fas fa-paw"></i> Productos</a>
+    <a href="carrito.html"><i class="fas fa-shopping-cart"></i> Carrito</a>
+    <a href="perfil.html"><i class="fas fa-user"></i> Perfil</a>
+  </nav>
+
+  <div class="profile-container">
+    <div class="profile-card">
+      <h2 id="welcomeMessage">¡Bienvenido, Usuario!</h2>
+      <p><strong>Correo:</strong> <span id="userEmail">Cargando...</span></p>
+      <p><strong>Teléfono:</strong> <span id="userPhone">Cargando...</span></p>
+      <p><strong>Dirección:</strong> <span id="userAddress">Cargando...</span></p>
+
+      <!-- Botones de opciones -->
+      <button id="editToggleBtn"><i class="fas fa-edit"></i> Editar Perfil</button>
+      <button onclick="window.location.href='mis_compras.html'"><i class="fas fa-box"></i> Mis Compras</button>
+      <button onclick="window.location.href='consultas_usuario.html'"><i class="fas fa-question-circle"></i> Ayuda</button>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+
+      <!-- Formulario de edición oculto -->
+      <div class="edit-form" id="editForm">
+        <label for="editPhone">Teléfono:</label>
+        <input type="text" id="editPhone" placeholder="Ingrese los 8 dígitos restantes" maxlength="8" />
+        <label for="editAddress">Dirección:</label>
+        <input type="text" id="editAddress" placeholder="Nueva dirección" />
+
+        <label for="newPassword">Nueva Contraseña:</label>
+        <input type="password" id="newPassword" placeholder="Nueva contraseña" />
+        <label for="confirmPassword">Confirmar Contraseña:</label>
+        <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" />
+
+        <div style="display: flex; gap: 10px;">
+          <button id="saveChangesBtn">Guardar Cambios</button>
+          <button id="cancelBtn" style="background-color: #f44336;">Atrás</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    // Obtener los datos del usuario autenticado y la lista de usuarios
+    const storedUser = JSON.parse(localStorage.getItem('user')) || {};
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+
+    // Redirigir si no está autenticado
+    if (!isAuthenticated) {
+      alert('Debes iniciar sesión para ver tu perfil.');
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('userEmail').textContent = storedUser.email;
+      document.getElementById('userPhone').textContent = storedUser.phone ? `+56 9 ${storedUser.phone}` : 'Sin definir';
+      document.getElementById('userAddress').textContent = storedUser.address || 'Sin definir';
+      document.getElementById('welcomeMessage').textContent = `¡Bienvenido, ${storedUser.name || 'Usuario'}!`;
+    }
+
+    // Mostrar nombre del usuario
+    window.onload = function() {
+      if (isAuthenticated) {
+        document.getElementById('userWelcome').textContent = `Hola, ${storedUser.name || 'Usuario'}`;
+        document.getElementById('userWelcome').style.display = 'block';
+      }
+    };
+
+    // Mostrar/ocultar formulario de edición y limpiar campos
+    const editForm = document.getElementById('editForm');
+    document.getElementById('editToggleBtn').addEventListener('click', () => {
+      if (editForm.style.display === 'none') {
+        editForm.style.display = 'flex';
+        
+        // Limpiar los campos del formulario de edición
+        document.getElementById('editPhone').value = '';
+        document.getElementById('editAddress').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+      } else {
+        editForm.style.display = 'none';
+      }
+    });
+
+    // Guardar cambios
+    document.getElementById('saveChangesBtn').addEventListener('click', function () {
+      const newPhoneSuffix = document.getElementById('editPhone').value;
+      const newAddress = document.getElementById('editAddress').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Validar que el teléfono tenga exactamente 8 dígitos
+      if (newPhoneSuffix && newPhoneSuffix.length === 8) {
+        storedUser.phone = newPhoneSuffix;
+      } else if (newPhoneSuffix) {
+        alert('El teléfono debe contener exactamente 8 dígitos.');
+        return;
+      }
+
+      // Validar y actualizar la contraseña
+      if (newPassword || confirmPassword) {
+        if (newPassword === confirmPassword) {
+          storedUser.password = newPassword;
+        } else {
+          alert('Las contraseñas no coinciden.');
+          return;
+        }
+      }
+
+      if (newAddress) storedUser.address = newAddress;
+
+      // Actualizar el usuario en el array de usuarios
+      const userIndex = users.findIndex(user => user.email === storedUser.email);
+      if (userIndex !== -1) {
+        users[userIndex] = storedUser;
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('user', JSON.stringify(storedUser)); // También actualizar el usuario autenticado
+      }
+
+      // Refrescar datos en pantalla
+      document.getElementById('userPhone').textContent = storedUser.phone ? `+56 9 ${storedUser.phone}` : 'Sin definir';
+      document.getElementById('userAddress').textContent = storedUser.address;
+
+      // Ocultar el formulario de edición
+      editForm.style.display = 'none';
+      alert('Cambios guardados exitosamente.');
+    });
+
+    // Botón "Atrás" para cerrar el formulario sin guardar
+    document.getElementById('cancelBtn').addEventListener('click', function () {
+      editForm.style.display = 'none';
+    });
+
+    // Cerrar sesión
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      localStorage.removeItem('isAuthenticated');
+      alert('Has cerrado sesión.');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

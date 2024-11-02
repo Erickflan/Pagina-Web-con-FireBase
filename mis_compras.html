@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Compras - Sakura Petshop</title>
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #f9f9f9;
+      margin: 0;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+
+    nav {
+      background-color: #333;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .main-content {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .purchase-group {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin: 10px 0;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .purchase-group h3 {
+      margin: 0;
+      color: #af4c95;
+    }
+
+    .purchase-group p {
+      color: #333;
+      margin: 5px 0;
+    }
+
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .product-item:last-child {
+      border-bottom: none;
+    }
+
+    .product-name {
+      font-weight: bold;
+    }
+
+    .product-quantity,
+    .product-price {
+      font-size: 1em;
+    }
+
+    .total-amount {
+      font-weight: bold;
+      color: #af4c95;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    .no-purchases {
+      text-align: center;
+      color: #777;
+      font-size: 1.2em;
+      margin-top: 20px;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sakura Petshop</h1>
+    <p>Mis Compras</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="productos.html">Productos</a>
+    <a href="perfil.html">Perfil</a>
+  </nav>
+
+  <div class="main-content" id="purchasesContainer">
+    <!-- Aquí se mostrarán las compras -->
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    function loadPurchases() {
+      const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+      const purchases = JSON.parse(localStorage.getItem('purchases')) || [];
+      const container = document.getElementById('purchasesContainer');
+
+      if (!currentUser.email) {
+        container.innerHTML = '<p class="no-purchases">Inicia sesión para ver tus compras.</p>';
+        return;
+      }
+
+      const userPurchases = purchases.filter(purchase => purchase.clientEmail === currentUser.email);
+
+      if (userPurchases.length === 0) {
+        container.innerHTML = '<p class="no-purchases">No has realizado ninguna compra aún.</p>';
+        return;
+      }
+
+      const groupedPurchases = {};
+      userPurchases.forEach(purchase => {
+        const orderNumber = purchase.orderNumber;
+        if (!groupedPurchases[orderNumber]) {
+          groupedPurchases[orderNumber] = {
+            date: purchase.date,
+            status: purchase.status,
+            paymentMethod: purchase.paymentMethod,
+            products: [],
+            totalAmount: 0
+          };
+        }
+        groupedPurchases[orderNumber].products.push({
+          name: purchase.productName,
+          price: purchase.price,
+          quantity: purchase.quantity
+        });
+        groupedPurchases[orderNumber].totalAmount += purchase.price * purchase.quantity;
+      });
+
+      for (const orderNumber in groupedPurchases) {
+        const purchaseData = groupedPurchases[orderNumber];
+        const purchaseGroup = document.createElement('div');
+        purchaseGroup.classList.add('purchase-group');
+        purchaseGroup.innerHTML = `
+          <h3><strong>Pedido #${orderNumber}</strong></h3>
+          <p><strong>Fecha de Compra:</strong> ${purchaseData.date}</p>
+          <p><strong>Estado:</strong> ${purchaseData.status}</p>
+          <p><strong>Método de Pago:</strong> ${purchaseData.paymentMethod}</p>
+          <div class="product-items">
+            ${purchaseData.products.map(product => `
+              <div class="product-item">
+                <span class="product-name">${product.name}</span>
+                <span class="product-quantity">Cantidad: ${product.quantity}</span>
+                <span class="product-price">$${(product.price * product.quantity).toLocaleString()}</span>
+              </div>
+            `).join('')}
+          </div>
+          <p class="total-amount"><strong>Total Pagado:</strong> $${purchaseData.totalAmount.toLocaleString()}</p>
+        `;
+        container.appendChild(purchaseGroup);
+      }
+    }
+
+    loadPurchases();
+  </script>
+</body>
+</html>

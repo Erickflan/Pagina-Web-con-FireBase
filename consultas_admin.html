@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultas - Sakura Petshop</title>
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      margin-top: 20px;
+    }
+
+    .user-list {
+      width: 30%;
+      border-right: 1px solid #ddd;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .user-item {
+      padding: 10px;
+      margin: 5px 0;
+      background-color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .user-item:hover {
+      background-color: #efefef;
+    }
+
+    .chat-box {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow-y: auto;
+      background-color: #fff;
+    }
+
+    .message {
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 5px;
+      max-width: 80%;
+    }
+
+    .user-message {
+      background-color: #f1f1f1;
+      align-self: flex-start;
+    }
+
+    .admin-message {
+      background-color: #af4c95;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .input-container {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #af4c95;
+      border-radius: 5px 0 0 5px;
+    }
+
+    .input-container button {
+      padding: 10px;
+      border: none;
+      color: white;
+      background-color: #af4c95;
+      cursor: pointer;
+      border-radius: 0 5px 5px 0;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sakura Petshop - Consultas de Usuarios</h1>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="carrito.html">Carrito</a>
+  <a href="perfil_admin.html">Perfil Admin</a>
+</nav>
+
+<div class="container">
+  <!-- Lista de usuarios -->
+  <div class="user-list">
+    <h3>Consultas de Usuarios</h3>
+    <div id="userList"></div>
+  </div>
+
+  <!-- Caja de chat -->
+  <div class="chat-box">
+    <div class="messages" id="chatMessages">
+      <p style="text-align: center; color: #888;">Seleccione un usuario para ver la conversación</p>
+    </div>
+    <div class="input-container">
+      <input type="text" id="adminMessageInput" placeholder="Escribe una respuesta..." disabled />
+      <button id="sendBtn" disabled>Enviar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+</footer>
+
+<script>
+  // Cargar las consultas desde localStorage
+  const consultas = JSON.parse(localStorage.getItem('consultas')) || [];
+
+  const userList = document.getElementById('userList');
+  const chatMessages = document.getElementById('chatMessages');
+  const adminMessageInput = document.getElementById('adminMessageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  let selectedUserIndex = null;
+
+  // Mostrar lista de usuarios con consultas
+  function loadUserList() {
+    userList.innerHTML = '';
+    consultas.forEach((consulta, index) => {
+      const userItem = document.createElement('div');
+      userItem.className = 'user-item';
+      userItem.textContent = consulta.userEmail;
+      userItem.onclick = () => selectUser(index);
+      userList.appendChild(userItem);
+    });
+  }
+
+  // Seleccionar usuario y mostrar mensajes
+  function selectUser(index) {
+    selectedUserIndex = index;
+    chatMessages.innerHTML = '';
+    const consulta = consultas[index];
+    consulta.messages.forEach(message => {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${message.sender === 'user' ? 'user-message' : 'admin-message'}`;
+      messageDiv.textContent = message.text;
+      chatMessages.appendChild(messageDiv);
+    });
+    adminMessageInput.disabled = false;
+    sendBtn.disabled = false;
+  }
+
+  // Enviar mensaje como administrador
+  sendBtn.addEventListener('click', () => {
+    const messageText = adminMessageInput.value.trim();
+    if (messageText && selectedUserIndex !== null) {
+      const message = { text: messageText, sender: 'admin' };
+      consultas[selectedUserIndex].messages.push(message);
+      localStorage.setItem('consultas', JSON.stringify(consultas)); // Guardar en localStorage
+
+      // Mostrar mensaje en el chat
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message admin-message';
+      messageDiv.textContent = message.text;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight; // Desplazar hacia abajo
+      adminMessageInput.value = '';
+    }
+  });
+
+  // Cargar lista de usuarios al inicio
+  loadUserList();
+</script>
+
+</body>
+</html>

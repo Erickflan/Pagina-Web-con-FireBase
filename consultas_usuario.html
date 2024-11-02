@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultas de Usuario - Sakura Petshop</title>
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .chat-box {
+      width: 100%;
+      max-width: 600px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .messages {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 5px;
+      margin: 5px 0;
+    }
+
+    .user-message {
+      background-color: #f1f1f1;
+      align-self: flex-start;
+    }
+
+    .admin-message {
+      background-color: #af4c95;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .input-container {
+      display: flex;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #af4c95;
+      border-radius: 5px 0 0 5px;
+    }
+
+    .input-container button {
+      padding: 10px;
+      border: none;
+      color: white;
+      background-color: #af4c95;
+      cursor: pointer;
+      border-radius: 0 5px 5px 0;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sakura Petshop - Consultas de Usuario</h1>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="carrito.html">Carrito</a>
+  <a href="perfil.html">Perfil</a>
+</nav>
+
+<div class="chat-container">
+  <div class="chat-box">
+    <div class="messages" id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="userMessage" placeholder="Escribe un mensaje...">
+      <button id="sendMessage">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+</footer>
+
+<script>
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const consultas = JSON.parse(localStorage.getItem('consultas')) || [];
+
+  function loadMessages() {
+    const userConsultas = consultas.find(c => c.userEmail === user.email) || { messages: [] };
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.innerHTML = '';
+
+    userConsultas.messages.forEach(message => {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${message.sender === 'user' ? 'user-message' : 'admin-message'}`;
+      messageDiv.textContent = message.text;
+      messagesDiv.appendChild(messageDiv);
+    });
+
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function sendMessage() {
+    const messageInput = document.getElementById('userMessage');
+    const messageText = messageInput.value.trim();
+    if (!messageText) return;
+
+    const userConsultaIndex = consultas.findIndex(c => c.userEmail === user.email);
+    const message = { text: messageText, sender: 'user' };
+
+    if (userConsultaIndex !== -1) {
+      consultas[userConsultaIndex].messages.push(message);
+    } else {
+      consultas.push({ userEmail: user.email, messages: [message] });
+    }
+
+    localStorage.setItem('consultas', JSON.stringify(consultas));
+    messageInput.value = '';
+    loadMessages();
+  }
+
+  document.getElementById('sendMessage').addEventListener('click', sendMessage);
+
+  loadMessages();
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Administrativo - Sakura Petshop</title>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .admin-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+
+    .admin-options {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+    }
+
+    .admin-options h2 {
+      color: #af4c95;
+      margin-bottom: 20px;
+    }
+
+    .admin-options button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background-color: #af4c95;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .admin-options button:hover {
+      background-color: #7b346f;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header>
+    <h1>Sakura Petshop</h1>
+    <p>Perfil Administrativo - Bienvenido, <span id="userName">Administrador</span></p>
+  </header>
+
+  <!-- Barra de Navegación -->
+  <nav>
+    <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+    <a href="productos.html"><i class="fas fa-paw"></i> Productos</a>
+    <a href="carrito.html"><i class="fas fa-shopping-cart"></i> Carrito</a>
+    <a href="perfil_admin.html"><i class="fas fa-user"></i> Perfil Admin</a>
+  </nav>
+
+  <!-- Contenedor de Opciones Administrativas -->
+  <div class="admin-container">
+    <div class="admin-options">
+      <h2>Opciones Administrativas</h2>
+      <button onclick="window.location.href='nuevos_productos.html'"><i class="fas fa-plus-circle"></i> Nuevos Productos</button>
+      <button onclick="window.location.href='gestion_productos.html'"><i class="fas fa-edit"></i> Gestión de Productos</button>
+      <button onclick="window.location.href='ver_ordenes.html'"><i class="fas fa-box"></i> Ver Órdenes</button>
+      <button onclick="window.location.href='ver_comentarios.html'"><i class="fas fa-comments"></i> Ver Comentarios</button>
+      <button onclick="window.location.href='consultas_admin.html'"><i class="fas fa-comments"></i> Consultas</button>
+      <button onclick="window.location.href='crear_usuario.html'"><i class="fas fa-user-plus"></i> Crear Usuarios</button>
+      <button onclick="window.location.href='gestionar_usuarios.html'"><i class="fas fa-users-cog"></i> Gestionar Usuarios</button>
+      <button onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    // Mostrar nombre del usuario en el perfil administrativo
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    const userNameElement = document.getElementById('userName');
+    if (storedUser && storedUser.name) {
+      userNameElement.textContent = storedUser.name;
+    }
+
+    // Función para cerrar sesión
+    function cerrarSesion() {
+      localStorage.removeItem('isAuthenticated');
+      alert('Has cerrado sesión.');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

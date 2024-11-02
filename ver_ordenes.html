@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Órdenes - Sakura Petshop</title>
+  <style>
+    body { font-family: Trebuchet MS, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; display: flex; flex-direction: column; min-height: 100vh; }
+    header { background-color: #af4c95; color: white; text-align: center; padding: 15px; }
+    nav { background-color: #333; text-align: center; }
+    nav a { color: white; padding: 14px 20px; text-decoration: none; display: inline-block; }
+    nav a:hover { background-color: #ddd; color: black; }
+    .container { flex: 1; padding: 20px; }
+    .order-group { background-color: white; border: 1px solid #ddd; border-radius: 5px; margin: 10px 0; padding: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .order-group h3 { color: #af4c95; margin: 0; }
+    .order-group p { color: #333; margin: 5px 0; }
+    .product-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .product-item:last-child { border-bottom: none; }
+    .product-name { font-weight: bold; }
+    .product-quantity, .product-price { font-size: 1em; }
+    .total-amount { font-weight: bold; color: #af4c95; text-align: right; margin-top: 10px; }
+    .status-select { padding: 5px; font-size: 1em; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn { padding: 8px 15px; border: none; cursor: pointer; border-radius: 5px; }
+    .btn-edit { background-color: #f0ad4e; color: white; }
+    .btn-delete { background-color: #d9534f; color: white; }
+    .btn:hover { opacity: 0.9; }
+    .no-orders { text-align: center; color: #777; font-size: 1.2em; margin-top: 20px; }
+    footer { background-color: #333; color: white; text-align: center; padding: 10px 0; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sakura Petshop - Órdenes de Clientes</h1>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="carrito.html">Carrito</a>
+  <a href="perfil_admin.html">Perfil Admin</a>
+</nav>
+
+<div class="container" id="orderContainer">
+  <h2>Órdenes Recibidas</h2>
+  <!-- Aquí se mostrarán las órdenes -->
+</div>
+
+<footer>
+  <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+</footer>
+
+<script>
+  function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem('purchases')) || [];
+    const orderContainer = document.getElementById('orderContainer');
+    orderContainer.innerHTML = '';
+
+    if (orders.length === 0) {
+      orderContainer.innerHTML = '<p class="no-orders">No hay órdenes disponibles.</p>';
+      return;
+    }
+
+    const groupedOrders = orders.reduce((acc, order) => {
+      if (!acc[order.orderNumber]) acc[order.orderNumber] = [];
+      acc[order.orderNumber].push(order);
+      return acc;
+    }, {});
+
+    for (const orderNumber in groupedOrders) {
+      const orderData = groupedOrders[orderNumber];
+      const { clientName, clientEmail, clientPhone, clientAddress, date, paymentMethod, status } = orderData[0];
+
+      const orderGroup = document.createElement('div');
+      orderGroup.classList.add('order-group');
+      orderGroup.innerHTML = `
+        <h3><strong>Pedido #${orderNumber}</strong></h3>
+        <p><strong>Cliente:</strong> ${clientName}</p>
+        <p><strong>Correo:</strong> ${clientEmail}</p>
+        <p><strong>Teléfono:</strong> ${clientPhone}</p>
+        <p><strong>Dirección:</strong> ${clientAddress}</p>
+        <p><strong>Fecha de Compra:</strong> ${date}</p>
+        <p><strong>Método de Pago:</strong> ${paymentMethod}</p>
+        <div class="product-items">
+          ${orderData.map(product => `
+            <div class="product-item">
+              <span class="product-name">${product.productName}</span>
+              <span class="product-quantity">Cantidad: ${product.quantity}</span>
+              <span class="product-price">$${(product.price * product.quantity).toLocaleString()}</span>
+            </div>
+          `).join('')}
+        </div>
+        <p class="total-amount"><strong>Total:</strong> $${orderData.reduce((total, product) => total + (product.price * product.quantity), 0).toLocaleString()}</p>
+        <p><strong>Estado:</strong> 
+          <select class="status-select" onchange="updateOrderStatus('${orderNumber}', this.value)">
+            <option value="Recibido" ${status === 'Recibido' ? 'selected' : ''}>Recibido</option>
+            <option value="En Proceso" ${status === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+            <option value="Enviado" ${status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+            <option value="Entregado" ${status === 'Entregado' ? 'selected' : ''}>Entregado</option>
+            <option value="Cancelado" ${status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+            
+          </select>
+        </p>
+        <div class="action-buttons">
+          <button class="btn btn-edit" onclick="editOrder('${orderNumber}')">Editar</button>
+          <button class="btn btn-delete" onclick="deleteOrder('${orderNumber}')">Eliminar</button>
+        </div>
+      `;
+      orderContainer.appendChild(orderGroup);
+    }
+  }
+
+  function updateOrderStatus(orderNumber, status) {
+    const orders = JSON.parse(localStorage.getItem('purchases')) || [];
+    orders.forEach(order => {
+      if (order.orderNumber === orderNumber) order.status = status;
+    });
+    localStorage.setItem('purchases', JSON.stringify(orders));
+    loadOrders();
+  }
+
+  function deleteOrder(orderNumber) {
+    let orders = JSON.parse(localStorage.getItem('purchases')) || [];
+    orders = orders.filter(order => order.orderNumber !== orderNumber);
+    localStorage.setItem('purchases', JSON.stringify(orders));
+    loadOrders();
+  }
+
+  function editOrder(orderNumber) {
+    alert(`Editando la orden #${orderNumber}. Puedes cambiar su estado desde la lista desplegable.`);
+  }
+
+  window.onload = loadOrders;
+</script>
+
+</body>
+</html>

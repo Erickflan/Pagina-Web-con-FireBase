@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Usuario - Sakura Petshop</title>
+
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      width: 100%;
+    }
+
+    nav {
+      background-color: #333;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    nav a {
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .register-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    h2 {
+      color: #af4c95;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #af4c95;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #af4c95;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7b346f;
+    }
+
+    .error-message {
+      color: red;
+      display: none;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      width: 100%;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sakura Petshop</h1>
+    <p>Registro de Usuario</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="productos.html">Productos</a>
+    <a href="carrito.html">Carrito</a>
+    <a href="login.html">Iniciar Sesión</a>
+  </nav>
+
+  <div class="register-container">
+    <h2>Crear una Cuenta</h2>
+    <form id="registerForm">
+      <input type="text" id="userName" placeholder="Nombre de usuario" required />
+      <input type="email" id="userEmail" placeholder="Correo electrónico" required />
+      <input type="password" id="userPassword" placeholder="Contraseña" required />
+      <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required />
+      <button type="submit">Registrarse</button>
+      <p class="error-message" id="errorMessage">Error: Solo se permiten correos @gmail.com o @sakura.pet.cl</p>
+      <p class="error-message" id="passwordError" style="display: none;">Error: Las contraseñas no coinciden.</p>
+    </form>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const name = document.getElementById('userName').value;
+      const email = document.getElementById('userEmail').value;
+      const password = document.getElementById('userPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorMessage = document.getElementById('errorMessage');
+      const passwordError = document.getElementById('passwordError');
+
+      // Validación de coincidencia de contraseñas
+      if (password !== confirmPassword) {
+        passwordError.style.display = 'block';
+        return;
+      } else {
+        passwordError.style.display = 'none';
+      }
+
+      // Validación del dominio del correo
+      let userType;
+      if (email.endsWith('@gmail.com')) {
+        userType = 'user';
+      } else if (email.endsWith('@sakura.pet.cl')) {
+        userType = 'admin';
+      } else {
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      errorMessage.style.display = 'none';
+
+      // Obtener la lista de usuarios existente en localStorage o crear una nueva
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      
+      // Verificar si el usuario ya existe
+      if (users.some(user => user.email === email)) {
+        alert('Este correo ya está registrado. Por favor, usa otro correo.');
+        return;
+      }
+
+      // Agregar el nuevo usuario al array de usuarios y guardarlo en localStorage
+      users.push({ name, email, password, userType, status: 'active' });
+      localStorage.setItem('users', JSON.stringify(users));
+
+      alert('¡Usuario creado exitosamente!');
+      document.getElementById('registerForm').reset();
+    });
+  </script>
+</body>
+</html>

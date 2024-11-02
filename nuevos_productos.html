@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo Producto - Sakura Petshop</title>
+  <style>
+    body {
+      font-family: Trebuchet MS, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #af4c95;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    nav a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .product-form-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .product-form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .product-form h2 {
+      color: #af4c95;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .product-form label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #333;
+    }
+
+    .product-form input[type="text"],
+    .product-form input[type="number"],
+    .product-form select,
+    .product-form input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .product-form button {
+      width: 100%;
+      padding: 10px;
+      background-color: #af4c95;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .product-form button:hover {
+      background-color: #7b346f;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sakura Petshop</h1>
+  <p>Agregar Nuevo Producto</p>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="carrito.html">Carrito</a>
+  <a href="perfil_admin.html">Perfil Admin</a>
+</nav>
+
+<div class="product-form-container">
+  <div class="product-form">
+    <h2>Agregar Nuevo Producto</h2>
+    <label>Nombre del Producto:</label>
+    <input type="text" id="productName" required>
+
+    <label>Descripción:</label>
+    <input type="text" id="productDescription" required>
+
+    <label>Precio:</label>
+    <input type="number" id="productPrice" min="0" required>
+
+    <label>Precio de Oferta (Opcional):</label>
+    <input type="number" id="offerPrice" min="0">
+
+    <label>Cantidad en Stock:</label>
+    <input type="number" id="productStock" min="0" required>
+
+    <label>Categoría:</label>
+    <select id="productCategory" required>
+      <option value="perros">Perros</option>
+      <option value="gatos">Gatos</option>
+      <option value="otros">Otros</option>
+    </select>
+
+    <label>Subcategoría:</label>
+    <select id="productSubcategory" required>
+      <option value="alimentos">Alimentos</option>
+      <option value="medicamentos">Medicamentos</option>
+      <option value="juguetes">Juguetes</option>
+      <option value="arenas">Arenas</option>
+      <option value="rascadores">Rascadores</option>
+      <option value="snacks">Snacks</option>
+      <option value="camas">Camas</option>
+      <option value="acuario">Acuario</option>
+      <option value="casa">Casa</option>
+      <option value="collares">Collares</option>
+    </select>
+
+    <label>Mostrar en:</label>
+    <select id="showIn">
+      <option value="index">Index</option>
+      <option value="productos">Productos</option>
+      <option value="both">Ambas</option>
+    </select>
+
+    <label>Imagen del Producto:</label>
+    <input type="file" id="productImage" accept="image/*" required>
+
+    <button onclick="addProduct()">Agregar Producto</button>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2024 Sakura Petshop - Todos los derechos reservados</p>
+</footer>
+
+<script>
+  function addProduct() {
+    const name = document.getElementById('productName').value;
+    const description = document.getElementById('productDescription').value;
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const offerPrice = parseFloat(document.getElementById('offerPrice').value) || null;
+    const stock = parseInt(document.getElementById('productStock').value);
+    const category = document.getElementById('productCategory').value;
+    const subcategory = document.getElementById('productSubcategory').value;
+    const showIn = document.getElementById('showIn').value;
+    const imageInput = document.getElementById('productImage');
+
+    if (imageInput.files.length === 0) {
+      alert("Por favor, selecciona una imagen.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const image = e.target.result;
+      const products = JSON.parse(localStorage.getItem('products')) || [];
+
+      products.push({
+        name,
+        description,
+        price,
+        offerPrice,
+        stock,
+        category,
+        subcategory,
+        showIn,
+        image
+      });
+
+      localStorage.setItem('products', JSON.stringify(products));
+      alert('Producto agregado exitosamente.');
+
+      // Limpiar campos del formulario
+      document.getElementById('productName').value = '';
+      document.getElementById('productDescription').value = '';
+      document.getElementById('productPrice').value = '';
+      document.getElementById('offerPrice').value = '';
+      document.getElementById('productStock').value = '';
+      document.getElementById('productCategory').selectedIndex = 0;
+      document.getElementById('productSubcategory').selectedIndex = 0;
+      document.getElementById('showIn').selectedIndex = 0;
+      document.getElementById('productImage').value = '';
+    };
+
+    reader.readAsDataURL(imageInput.files[0]);
+  }
+</script>
+
+</body>
+</html>
